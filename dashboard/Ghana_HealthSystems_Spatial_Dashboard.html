@@ -54,8 +54,8 @@ tr:last-child td{border-bottom:none}
   <div class="k"><div class="kv">0.91</div><div class="kl">XGBoost AUC</div><div class="ks">LOROCV validated</div></div>
 </div>
 <div class="g">
-  <div class="pn"><div class="pt">&#128205; Health System Performance &#8212; Choropleth</div><div id="cPanel"></div></div>
-  <div class="pn"><div class="pt">&#128309; LISA Spatial Clusters</div><div id="lPanel"></div></div>
+  <div class="pn"><div class="pt">&#128205; Health System Performance &#8212; Choropleth</div><div id="cPanel"></div><div id="legC" style="margin-top:6px"></div></div>
+  <div class="pn"><div class="pt">&#128309; LISA Spatial Clusters</div><div id="lPanel"></div><div id="legL" style="margin-top:6px"></div></div>
   <div class="pn fw"><div class="pt">&#9679; Regional Performance Rankings &#8212; Lollipop Chart</div><div id="pC"></div></div>
   <div class="pn"><div class="pt">&#9672; Multi-Dimensional Profile &#8212; Radar Chart</div><div id="pD"></div></div>
   <div class="pn"><div class="pt">&#11044; Facility Density vs Coverage &#8212; Bubble Chart</div><div id="pE"></div></div>
@@ -138,12 +138,12 @@ function moveTip(e){_tp.style.left=(e.clientX+12)+'px';_tp.style.top=(e.clientY-
 function hideTip(){_tp.style.display='none';}
 function svgEl(tag,a,p){const e=document.createElementNS('http://www.w3.org/2000/svg',tag);for(const[k,v]of Object.entries(a||{}))e.setAttribute(k,v);if(p)p.appendChild(e);return e;}
 function dlSelf(f){const h='<!DOCTYPE html>\n'+document.documentElement.outerHTML;const b=new Blob([h],{type:'text/html;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=f;document.body.appendChild(a);a.click();setTimeout(()=>{document.body.removeChild(a);URL.revokeObjectURL(a.href);},120);}
-const RLBL=[[389,554,'Gr.Accra'],[214,457,'Ashanti'],[274,572,'Central'],[341,504,'Eastern'],[155,598,'Western'],[476,483,'Volta'],[440,330,'Oti'],[244,347,'Bono E'],[114,431,'Ahafo'],[98,372,'Bono'],[70,494,'W.North'],[322,45,'UE'],[105,81,'UW'],[364,186,'Northern'],[220,220,'Savannah'],[357,94,'NE']];
+const RLBL=[[271,377,'Gr.Accra'],[150,300,'Ashanti'],[202,381,'Central'],[250,336,'Eastern'],[120,401,'Western'],[327,268,'Volta'],[296,205,'Oti'],[218,201,'Bono E'],[68,265,'Ahafo'],[62,240,'Bono'],[40,293,'W.North'],[248,35,'UE'],[72,53,'UW'],[267,123,'Northern'],[162,146,'Savannah'],[287,65,'NE']];
 function _map(cId,isLISA){
   const c=document.getElementById(cId);c.innerHTML='';
   const vals=REGION.map(d=>d.v),mn=Math.min(...vals),mx=Math.max(...vals);
-  const svg=svgEl('svg',{width:'100%',viewBox:'0 0 560 700',style:'display:block;max-height:340px'},c);
-  svgEl('rect',{x:0,y:0,width:560,height:700,fill:'#ecf0f1'},svg);
+  const svg=svgEl('svg',{width:'100%',viewBox:'0 0 400 450',style:'display:block'},c);
+  svgEl('rect',{x:0,y:0,width:400,height:450,fill:'#ecf0f1'},svg);
   let af=null;const paths=[];
   for(const d of DSVG){
     if(!d.d)continue;
@@ -158,25 +158,27 @@ function _map(cId,isLISA){
   }
   RLBL.forEach(([x,y,t])=>svgEl('text',{x,y,'text-anchor':'middle','font-size':'8','fill':'rgba(20,20,20,.75)','font-weight':'600','pointer-events':'none',style:'text-shadow:0 0 3px #ecf0f1'},svg).textContent=t);
   if(!isLISA){
-    const lid='cg_'+Date.now(),defs=svgEl('defs',{},svg),gr=svgEl('linearGradient',{id:lid,x1:'0%',y1:'0%',x2:'100%',y2:'0%'},defs);
+    const lc=document.getElementById('legC');if(!lc)return;lc.innerHTML='';
+    const lid='cg_'+Date.now();
+    const gs=svgEl('svg',{width:'100%',height:'28',viewBox:'0 0 400 28',style:'display:block;margin-top:6px'},lc);
+    const defs=svgEl('defs',{},gs),gr=svgEl('linearGradient',{id:lid,x1:'0%',y1:'0%',x2:'100%',y2:'0%'},defs);
     svgEl('stop',{offset:'0%','stop-color':cs(0)},gr);svgEl('stop',{offset:'100%','stop-color':cs(1)},gr);
-    const lx=60,ly=672,lw=440,lh=10;
-    svgEl('rect',{x:lx,y:ly,width:lw,height:lh,fill:'url(#'+lid+')',rx:3,stroke:'#ccc','stroke-width':'0.5'},svg);
-    svgEl('text',{x:lx,y:ly+lh+11,'font-size':'9','fill':'#555','text-anchor':'start'},svg).textContent=mn.toFixed(1);
-    svgEl('text',{x:lx+lw/2,y:ly+lh+11,'text-anchor':'middle','font-size':'8','fill':'#888'},svg).textContent=PL;
-    svgEl('text',{x:lx+lw,y:ly+lh+11,'text-anchor':'end','font-size':'9','fill':'#555'},svg).textContent=mx.toFixed(1);
+    const lx=20,ly=2,lw=360,lh=10;
+    svgEl('rect',{x:lx,y:ly,width:lw,height:lh,fill:'url(#'+lid+')',rx:3,stroke:'#ccc','stroke-width':'0.5'},gs);
+    svgEl('text',{x:lx,y:ly+lh+12,'font-size':'9','fill':'#555','text-anchor':'start'},gs).textContent=mn.toFixed(1);
+    svgEl('text',{x:lx+lw/2,y:ly+lh+12,'text-anchor':'middle','font-size':'8','fill':'#888'},gs).textContent=PL;
+    svgEl('text',{x:lx+lw,y:ly+lh+12,'text-anchor':'end','font-size':'9','fill':'#555'},gs).textContent=mx.toFixed(1);
   } else {
-    const lg=svgEl('g',{transform:'translate(8,672)'},svg);
+    const ll=document.getElementById('legL');if(!ll)return;ll.innerHTML='';
     const cats=['HH','HL','LH','LL','NS'],lbs=['High-High','High-Low','Low-High','Low-Low','Not Sig.'];
+    const swatches=[];
+    const gs=svgEl('svg',{width:'100%',height:'24',viewBox:'0 0 530 24',style:'display:block;margin-top:6px'},ll);
     cats.forEach((lbl,i)=>{
       const x=i*106;
-      const sw=svgEl('rect',{x,y:0,width:14,height:14,fill:LC[lbl],rx:2,cursor:'pointer'},lg);
-      const tx=svgEl('text',{x:x+18,y:11,'font-size':'9','fill':'#333',cursor:'pointer'},lg);tx.textContent=lbs[i];
-      const tog=()=>{
-        af=(af===lbl)?null:lbl;
-        paths.forEach(p=>p.setAttribute('opacity',!af||p.dataset.lisa===af?'0.85':'0.12'));
-        Array.from(lg.children).forEach((ch,ci)=>{if(ci%2===0)ch.setAttribute('opacity',!af||cats[ci/2]===af?'1':'0.35');});
-      };
+      const sw=svgEl('rect',{x,y:5,width:14,height:14,fill:LC[lbl],rx:2,cursor:'pointer'},gs);
+      const tx=svgEl('text',{x:x+18,y:16,'font-size':'9','fill':'#333',cursor:'pointer'},gs);tx.textContent=lbs[i];
+      swatches.push(sw);
+      const tog=()=>{af=(af===lbl)?null:lbl;paths.forEach(p=>p.setAttribute('opacity',!af||p.dataset.lisa===af?'0.85':'0.12'));swatches.forEach((s,si)=>s.setAttribute('opacity',!af||cats[si]===af?'1':'0.35'));};
       sw.addEventListener('click',tog);tx.addEventListener('click',tog);
     });
   }
