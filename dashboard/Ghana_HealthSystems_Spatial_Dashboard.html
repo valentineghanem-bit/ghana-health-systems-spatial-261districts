@@ -152,15 +152,18 @@ function dlSelf(f){const h='<!DOCTYPE html>\n'+document.documentElement.outerHTM
 const RLBL=[[271,377,'Gr.Accra'],[150,300,'Ashanti'],[202,381,'Central'],[250,336,'Eastern'],[120,401,'Western'],[327,268,'Volta'],[296,205,'Oti'],[218,201,'Bono E'],[68,265,'Ahafo'],[62,240,'Bono'],[40,293,'W.North'],[248,35,'UE'],[72,53,'UW'],[267,123,'Northern'],[162,146,'Savannah'],[287,65,'NE']];
 function _map(cId,isLISA){
   const c=document.getElementById(cId);c.innerHTML='';
+  // V4 spec: clip container to prevent oversized map
+  c.style.cssText='overflow:hidden;max-height:320px';
   const vals=REGION.map(d=>d.v),mn=Math.min(...vals),mx=Math.max(...vals);
-  const svg=svgEl('svg',{width:'100%',viewBox:'0 0 400 450',style:'display:block'},c);
+  const svg=svgEl('svg',{width:'100%',viewBox:'0 0 400 450',style:'display:block;max-height:320px'},c);
   svgEl('rect',{x:0,y:0,width:400,height:450,fill:'#ecf0f1'},svg);
   let af=null;const paths=[];
   for(const d of DSVG){
     if(!d.d)continue;
     const rd=DDATA[d.n]||REGION.find(r=>r.name===d.r)||{};
     const v=rd.v||0,lisa=rd.lisa||'NS';
-    const fill=isLISA?(LC[lisa]||'#bdc3c7'):cs(mx>mn?(v-mn)/(mx-mn):0.5);
+    const t=mx>mn?(v-mn)/(mx-mn):0.5;
+    const fill=isLISA?(LC[lisa]||'#bdc3c7'):cs(t);
     const tip='<strong>'+d.n+'</strong><br><em>'+d.r+'</em><br>'+(isLISA?'LISA: <strong>'+(LL2[lisa]||lisa)+'</strong>':'Perf. Index: '+(v?v.toFixed(1):'&#8211;')+'<br>LISA: '+(LL2[lisa]||lisa));
     const el=svgEl('path',{d:d.d,fill,stroke:'rgba(255,255,255,0.5)','stroke-width':'0.2',opacity:isLISA?'0.85':'1',cursor:'pointer'},svg);
     el.dataset.lisa=lisa;paths.push(el);
@@ -169,16 +172,15 @@ function _map(cId,isLISA){
   }
   RLBL.forEach(([x,y,t])=>svgEl('text',{x,y,'text-anchor':'middle','font-size':'8','fill':'rgba(20,20,20,.75)','font-weight':'600','pointer-events':'none',style:'text-shadow:0 0 3px #ecf0f1'},svg).textContent=t);
   if(!isLISA){
-    const lc=document.getElementById('legC');if(!lc)return;lc.innerHTML='';
-    const lid='cg_'+Date.now();
-    const gs=svgEl('svg',{width:'100%',height:'28',viewBox:'0 0 400 28',style:'display:block;margin-top:6px'},lc);
-    const defs=svgEl('defs',{},gs),gr=svgEl('linearGradient',{id:lid,x1:'0%',y1:'0%',x2:'100%',y2:'0%'},defs);
-    svgEl('stop',{offset:'0%','stop-color':cs(0)},gr);svgEl('stop',{offset:'100%','stop-color':cs(1)},gr);
-    const lx=20,ly=2,lw=360,lh=10;
-    svgEl('rect',{x:lx,y:ly,width:lw,height:lh,fill:'url(#'+lid+')',rx:3,stroke:'#ccc','stroke-width':'0.5'},gs);
-    svgEl('text',{x:lx,y:ly+lh+12,'font-size':'9','fill':'#555','text-anchor':'start'},gs).textContent=mn.toFixed(1);
-    svgEl('text',{x:lx+lw/2,y:ly+lh+12,'text-anchor':'middle','font-size':'8','fill':'#888'},gs).textContent=PL;
-    svgEl('text',{x:lx+lw,y:ly+lh+12,'text-anchor':'end','font-size':'9','fill':'#555'},gs).textContent=mx.toFixed(1);
+    // V4 spec: 30-stop CSS gradient bar in HTML div — not in-SVG
+    const lgDiv=document.getElementById('legC');if(!lgDiv)return;lgDiv.innerHTML='';
+    lgDiv.style.cssText='display:flex;align-items:center;gap:6px;margin-top:4px;padding:0 2px';
+    const lo=document.createElement('span');lo.textContent=mn.toFixed(1);lo.style.cssText='color:#555;min-width:28px;font-size:.72em';
+    const bar=document.createElement('div');bar.style.cssText='flex:1;height:10px;border-radius:3px;overflow:hidden;border:1px solid #ddd;display:flex';
+    for(let i=0;i<30;i++){const s=document.createElement('span');s.style.cssText='flex:1;background:'+cs(i/29);bar.appendChild(s);}
+    const lbl=document.createElement('span');lbl.textContent=PL;lbl.style.cssText='color:#888;font-size:.72em;padding:0 6px';
+    const hi=document.createElement('span');hi.textContent=mx.toFixed(1);hi.style.cssText='color:#555;min-width:28px;text-align:right;font-size:.72em';
+    lgDiv.appendChild(lo);lgDiv.appendChild(bar);lgDiv.appendChild(lbl);lgDiv.appendChild(hi);
   } else {
     const ll=document.getElementById('legL');if(!ll)return;ll.innerHTML='';
     const cats=['HH','HL','LH','LL','NS'],lbs=['High-High','High-Low','Low-High','Low-Low','Not significant'];
@@ -234,7 +236,7 @@ function renderPanelC(){
 function renderPanelD(){
   const el=document.getElementById('pD');if(!el)return;el.innerHTML='';
   const N=RADAR.dims.length;
-  const wEl=el.offsetWidth||el.offsetWidth||el.getBoundingClientRect().width||400,w=Math.max(wEl,320),h=260;
+  const wEl=el.offsetWidth||el.getBoundingClientRect().width||400,w=Math.max(wEl,320),h=260;
   // Centred radar — no in-SVG legend (moved to HTML div below)
   const cx=w/2,cy=h/2,maxR=Math.min(cx-52,h/2-26);
   const svg=svgEl('svg',{width:'100%',viewBox:'0 0 '+w+' '+h,style:'display:block'},el);
@@ -285,7 +287,7 @@ function renderPanelD(){
 function renderPanelE(){
   const el=document.getElementById('pE');if(!el)return;el.innerHTML='';
   const mL=46,mR=16,mT=16,mB=36,ch=174;
-  const wEl=el.offsetWidth||el.offsetWidth||el.getBoundingClientRect().width||400,w=Math.max(wEl,320),pW=w-mL-mR;
+  const wEl=el.offsetWidth||el.getBoundingClientRect().width||400,w=Math.max(wEl,320),pW=w-mL-mR;
   const xs=BUBBLE.map(d=>d.x),ys=BUBBLE.map(d=>d.y),pops=BUBBLE.map(d=>d.pop);
   const xMn=0,xMx=Math.max(...xs)+1.2,yMn=20,yMx=100,mpop=Math.max(...pops);
   const px=v=>mL+(v-xMn)/(xMx-xMn)*pW,py=v=>mT+ch-(v-yMn)/(yMx-yMn)*ch;
