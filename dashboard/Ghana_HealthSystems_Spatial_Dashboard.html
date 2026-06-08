@@ -155,7 +155,7 @@ function _map(cId,isLISA){
   // V4 spec: clip container to prevent oversized map
   c.style.cssText='overflow:hidden;max-height:320px';
   const vals=REGION.map(d=>d.v),mn=Math.min(...vals),mx=Math.max(...vals);
-  const svg=svgEl('svg',{width:'100%',viewBox:'0 0 400 450',style:'display:block;max-height:320px'},c);
+  const svg=svgEl('svg',{width:'100%',viewBox:'0 0 400 450',style:'display:block;max-height:320px;background:#ecf0f1'},c);
   svgEl('rect',{x:0,y:0,width:400,height:450,fill:'#ecf0f1'},svg);
   let af=null;const paths=[];
   for(const d of DSVG){
